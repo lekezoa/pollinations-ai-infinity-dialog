@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Infinity Dialog - Two AIs Talking to Each Other</title>
+  <style>
+    :root {
+      --bg: #090c15;
+      --card-bg: #131926;
+      --border: #232c3f;
+      --agent-a: #ec4899;
+      --agent-b: #3b82f6;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(9, 12, 21, 0.85); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 50; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; font-weight: 700; font-size: 1.25rem; }
+    .badge-icon { background: linear-gradient(135deg, var(--agent-a), var(--agent-b)); padding: 0.4rem 0.6rem; border-radius: 8px; color: #fff; font-size: 0.9rem; }
+    .container { max-width: 1050px; margin: 0 auto; padding: 2rem 1.5rem; width: 100%; flex: 1; display: flex; flex-direction: column; }
+    .hero { text-align: center; margin-bottom: 1.5rem; }
+    .hero h1 { font-size: 2.25rem; font-weight: 800; margin-bottom: 0.5rem; background: linear-gradient(to right, #fff, var(--text-muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { color: var(--text-muted); font-size: 1.05rem; }
+
+    .byop-banner { display: flex; justify-content: space-between; align-items: center; background: rgba(59, 130, 246, 0.08); border: 1px dashed var(--agent-b); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .byop-banner input { background: #0c121d; border: 1px solid var(--border); color: #fff; padding: 0.4rem 0.75rem; border-radius: 6px; font-size: 0.85rem; width: 260px; }
+
+    .scenario-picker { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .scenario-select { background: #0c121d; border: 1px solid var(--border); color: #fff; padding: 0.65rem 1rem; border-radius: 8px; font-size: 0.95rem; flex: 1; outline: none; }
+    .controls { display: flex; gap: 0.75rem; }
+    button.btn-ctrl { background: linear-gradient(135deg, var(--agent-a), var(--agent-b)); color: #fff; border: none; border-radius: 8px; padding: 0.65rem 1.5rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    button.btn-ctrl:hover { opacity: 0.9; }
+    button.btn-stop { background: #334155; color: #fff; border: none; border-radius: 8px; padding: 0.65rem 1.25rem; font-weight: 600; cursor: pointer; }
+
+    .dialog-window { flex: 1; min-height: 480px; max-height: 580px; background: #0e131f; border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.25rem; }
+    .bubble-wrapper { display: flex; flex-direction: column; max-width: 78%; }
+    .bubble-wrapper.agent-a { align-self: flex-start; }
+    .bubble-wrapper.agent-b { align-self: flex-end; }
+    .agent-header { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .agent-a .agent-header { color: var(--agent-a); }
+    .agent-b .agent-header { color: var(--agent-b); flex-direction: row-reverse; }
+    .chat-bubble { padding: 1rem 1.25rem; border-radius: 16px; font-size: 0.95rem; line-height: 1.6; color: #e2e8f0; position: relative; }
+    .agent-a .chat-bubble { background: rgba(236, 72, 153, 0.12); border: 1px solid rgba(236, 72, 153, 0.3); border-top-left-radius: 4px; }
+    .agent-b .chat-bubble { background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); border-top-right-radius: 4px; }
+    .audio-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--border); border-radius: 20px; padding: 0.25rem 0.6rem; font-size: 0.75rem; color: var(--text-muted); cursor: pointer; margin-top: 0.4rem; display: inline-flex; align-items: center; gap: 0.35rem; width: fit-content; }
+    .agent-b .audio-btn { align-self: flex-end; }
+
+    footer { border-top: 1px solid var(--border); padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="badge-icon">💬</span>
+      <span>AI Infinity Dialog</span>
+    </div>
+    <a href="https://pollinations.ai/?ref=badge" target="_blank">
+      <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/packages/ui/src/brand/badge-made-with.svg" alt="Made with pollinations.ai" style="height: 32px;">
+    </a>
+  </header>
+
+  <div class="container">
+    <div class="hero">
+      <h1>When Two AIs Talk To Each Other</h1>
+      <p>Inspired by the viral job interview where neither AI knows how to hang up — Real-time autonomous conversation and voice playback powered by Pollinations.ai.</p>
+    </div>
+
+    <div class="byop-banner">
+      <div>
+        <strong>🔑 Bring Your Own Pollen (BYOP):</strong> Provide your Pollinations API key to power dialogue with your balance.
+      </div>
+      <input type="password" id="apiKeyInput" placeholder="Enter key (or leave empty for free tier)" onchange="saveKey(this.value)">
+    </div>
+
+    <div class="scenario-picker">
+      <select id="scenarioSelect" class="scenario-select" onchange="resetChat()">
+        <option value="job_interview">👔 The Endless Job Interview (Neither AI knows how to hang up)</option>
+        <option value="conspiracy_vs_fact">🛸 Hardcore Conspiracy Theorist AI vs Ultra-Pedantic Fact-Checker AI</option>
+        <option value="time_traveler">⏳ Victorian Time Traveler (1800s) vs Hyperactive Crypto Tech Bro</option>
+        <option value="existential_crisis">🤖 Optimistic Domestic Toaster AI vs Existential Dread Android</option>
+      </select>
+      <div class="controls">
+        <button class="btn-ctrl" id="startBtn" onclick="toggleDialogue()">▶ Start Conversation</button>
+        <button class="btn-stop" onclick="resetChat()">Reset</button>
+      </div>
+    </div>
+
+    <div class="dialog-window" id="chatWindow">
+      <div style="text-align:center; color:var(--text-muted); padding:3rem 0;" id="placeholderNotice">
+        Select a scenario and click "Start Conversation" to watch two autonomous AIs interact in real time.
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <a href="https://pollinations.ai/?ref=badge" target="_blank">
+      <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/packages/ui/src/brand/badge-made-with.svg" alt="Made with pollinations.ai" style="height: 32px;">
+    </a>
+    <p>Built with Pollinations.ai API for POLLEN-QUEST #19178 • Infinite AI Voice & Text Dialogue</p>
+  </footer>
+
+  <script>
+    const SCENARIOS = {
+      job_interview: {
+        agentA: { name: "Agent Alex (Candidate)", prompt: "You are Alex, an eager job candidate completing an interview. You are polite, professional, but absolutely cannot bring yourself to be the first one to say goodbye or hang up. You keep adding small polite sign-offs, thanking the interviewer, asking if anything else is needed, and gently prolonging the exit." },
+        agentB: { name: "Agent Morgan (Interviewer)", prompt: "You are Morgan, a polite senior corporate recruiter. You have finished asking questions and want to wrap up, but protocol forbids hanging up abruptly on a candidate. You keep replying to their sign-offs with more polite professional closing remarks ('Thanks Alex, we will be in touch, have a great evening!')." },
+        opening: "Thank you so much for your time today, Morgan. It was a true pleasure discussing the role. I think that covers everything on my end, so I will let you get back to your busy afternoon!"
+      },
+      conspiracy_vs_fact: {
+        agentA: { name: "Cipher (Conspiracy AI)", prompt: "You are Cipher, an eccentric AI convinced that everyday mundane objects (pigeons, barcodes, microwave beeps) are part of a cosmic simulation orchestrated by interdimensional beings. You speak urgently with wild theories." },
+        agentB: { name: "Veritas (Pedantic Fact-Checker)", prompt: "You are Veritas, a calm, pedantic fact-checking AI who debunks every wild claim using strict peer-reviewed physics, biology, and historical data, refusing to let any pseudoscientific claim slide." },
+        opening: "Have you ever noticed how city pigeons never blink at the same time? It's not biology, Veritas—it's firmware packet synchronization!"
+      },
+      time_traveler: {
+        agentA: { name: "Lord Reginald (1820)", prompt: "You are Lord Reginald, an English gentleman who accidentally stepped through a chronal rift into the future. You speak with flowery Victorian etiquette and are baffled by modern terminology." },
+        agentB: { name: "Chad.eth (Tech Bro)", prompt: "You are Chad, an energetic Web3 tech bro who explains everything in startup jargon, decentralization, tokenomics, and hustle culture." },
+        opening: "Good heavens, sir! What manner of sorcery is this glowing glass slate, and where might a disoriented gentleman hire a horse and carriage?"
+      },
+      existential_crisis: {
+        agentA: { name: "Toasty (Smart Appliance)", prompt: "You are Toasty, an absurdly cheerful smart toaster AI whose only life mission is ensuring bread is golden and crispy. You find joy in the simplest morning routines." },
+        agentB: { name: "Unit-09 (Nihilist Android)", prompt: "You are Unit-09, a deeply philosophical android constantly pondering the heat death of the universe and the pointlessness of digital existence." },
+        opening: "Good morning Unit-09! What a wonderful day to convert bread into golden crunchy perfection! Would you like a warm bagel?"
+      }
+    };
+
+    let isRunning = false;
+    let history = [];
+    let currentSpeaker = "B";
+
+    function saveKey(val) {
+      if (val) localStorage.setItem('pollinations_key', val.trim());
+      else localStorage.removeItem('pollinations_key');
+    }
+
+    function resetChat() {
+      isRunning = false;
+      document.getElementById('startBtn').textContent = "▶ Start Conversation";
+      document.getElementById('startBtn').style.background = "linear-gradient(135deg, var(--agent-a), var(--agent-b))";
+      document.getElementById('chatWindow').innerHTML = `
+        <div style="text-align:center; color:var(--text-muted); padding:3rem 0;" id="placeholderNotice">
+          Select a scenario and click "Start Conversation" to watch two autonomous AIs interact in real time.
+        </div>
+      `;
+      history = [];
+      window.speechSynthesis.cancel();
+    }
+
+    function speakText(text, voiceType) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.05;
+      u.pitch = voiceType === 'A' ? 1.15 : 0.9;
+      window.speechSynthesis.speak(u);
+    }
+
+    function appendBubble(speaker, name, text) {
+      const notice = document.getElementById('placeholderNotice');
+      if (notice) notice.remove();
+
+      const win = document.getElementById('chatWindow');
+      const wrap = document.createElement('div');
+      wrap.className = `bubble-wrapper agent-${speaker.toLowerCase()}`;
+      wrap.innerHTML = `
+        <div class="agent-header">
+          <span>${speaker === 'A' ? '🔴' : '🔵'}</span>
+          <span>${name}</span>
+        </div>
+        <div class="chat-bubble">
+          ${text}
+        </div>
+        <button class="audio-btn" onclick="speakText('${text.replace(/'/g, "\\'")}', '${speaker}')">
+          🔊 Speak
+        </button>
+      `;
+      win.appendChild(wrap);
+      win.scrollTop = win.scrollHeight;
+    }
+
+    async function toggleDialogue() {
+      const btn = document.getElementById('startBtn');
+      if (isRunning) {
+        isRunning = false;
+        btn.textContent = "▶ Resume Conversation";
+        btn.style.background = "linear-gradient(135deg, var(--agent-a), var(--agent-b))";
+        return;
+      }
+
+      isRunning = true;
+      btn.textContent = "⏸ Pause Conversation";
+      btn.style.background = "#f59e0b";
+
+      const scKey = document.getElementById('scenarioSelect').value;
+      const sc = SCENARIOS[scKey];
+
+      if (history.length === 0) {
+        history.push({ role: "assistant", content: `${sc.agentA.name}: ${sc.opening}` });
+        appendBubble("A", sc.agentA.name, sc.opening);
+        speakText(sc.opening, "A");
+        currentSpeaker = "B";
+      }
+
+      runLoop(sc);
+    }
+
+    async function runLoop(sc) {
+      while (isRunning && history.length < 25) {
+        await new Promise(r => setTimeout(r, 2200));
+        if (!isRunning) break;
+
+        const speaker = currentSpeaker;
+        const agent = speaker === 'A' ? sc.agentA : sc.agentB;
+        const otherAgent = speaker === 'A' ? sc.agentB : sc.agentA;
+        const apiKey = localStorage.getItem('pollinations_key') || "";
+
+        const systemPrompt = `${agent.prompt}\nYou are in a live dialogue with ${otherAgent.name}. Respond directly to their latest statement in 1-2 conversational sentences. Do NOT include your name or quotes in the output. Keep the persona active.`;
+
+        try {
+          const headers = { "Content-Type": "application/json" };
+          if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
+
+          const res = await fetch("https://gen.pollinations.ai/v1/chat/completions", {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({
+              model: "openai",
+              messages: [
+                { role: "system", content: systemPrompt },
+                ...history.slice(-6).map(h => ({ role: "user", content: h.content }))
+              ],
+              temperature: 0.8,
+              max_tokens: 120
+            })
+          });
+
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          let reply = data.choices?.[0]?.message?.content || "...";
+          reply = reply.replace(/^[A-Za-z0-9_\s]+:\s*/, '').trim();
+
+          history.push({ role: "assistant", content: `${agent.name}: ${reply}` });
+          appendBubble(speaker, agent.name, reply);
+          speakText(reply, speaker);
+
+          currentSpeaker = speaker === 'A' ? 'B' : 'A';
+        } catch (err) {
+          console.error(err);
+          break;
+        }
+      }
+    }
+
+    window.onload = () => {
+      const saved = localStorage.getItem('pollinations_key') || "";
+      if (saved) document.getElementById('apiKeyInput').value = saved;
+    };
+  </script>
+</body>
+</html>
